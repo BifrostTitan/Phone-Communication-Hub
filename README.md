@@ -6,7 +6,7 @@ Login & Registration portal for employees
 
 SMS chatting between employees and callers
 
-Automatic contact saving and SMS chat messenger
+Automatic contact saving and message logging
 
 Pop up phone dial menu similar to facebook messenger
 
