@@ -16,4 +16,5 @@ Voice mail recording when no associates are online to take a call
 
 --Needs finishing--
 
-Phone audio and employee mic streaming completely implemented. Raw integration is in there but not functioning correctly
+Needs phone audio and employee mic streaming completely implemented. Raw integration is in there but not functioning correctly
+
