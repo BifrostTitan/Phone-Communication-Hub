@@ -12,7 +12,7 @@ Pop up phone dial menu similar to facebook messenger
 
 Vonage webhooks to redirect callers/texters to other employees
 
-Voice mail recording for when no associates are online to take a call
+Voice mail recording when no associates are online to take a call
 
 --Needs finishing--
 Phone audio and employee mic streaming completely implemented. Raw integration is in there but not functioning correctly
