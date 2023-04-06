@@ -1,0 +1,535 @@
+﻿@page "/dashboard/{teammateID}"
+@using Google.Protobuf
+@using Microsoft.AspNetCore.Mvc
+@using Microsoft.Extensions.Logging
+@using System.ComponentModel.DataAnnotations
+@inject ILogger<AccountInfo> Logger
+@inject NavigationManager navigator
+@using Microsoft.JSInterop
+@using System.Net.WebSockets
+@using System.Threading
+@using System.IO
+@using System.Media
+@inject IJSRuntime JS
+@functions{
+    [Parameter]
+     public string teammateId { get; set; }
+
+}
+<!--profile menu-->
+<div class="profileMenu">
+  <div class="profileWrap">
+    <div class="profileImg"><img src="icons/userProfile1.png" alt=""></div>
+    <div class="profileHolder">
+      <div class="profileName">@accountInfo.Name</div>
+      <div class="profileStatus">ACTIVE</div>
+    </div>
+  </div>
+  
+  <div class="profileInput"><input type="text" placeholder="Set your status"></div>
+  
+  <div class="profileItem"><img src="icons/profile1.png" alt="">Set yourself as away</div>
+  <div class="profileItem"><img src="icons/profile2.png" alt="">Do not disturb</div>
+  <div class="profileItem"><img src="icons/profile3.png" alt="">Edit account</div>
+  <div class="profileItem"><img src="icons/profile4.png" alt="">Referrals</div>
+  <div class="profileSep"></div>
+  
+  <div class="profileLabel">Workspace</div>
+  <div class="profileItem active"><img src="icons/profile1.png" alt="">Workspace settings</div>
+  <div class="profileItem"><img src="icons/profile5.png" alt="">Invite your team</div>
+  <div class="profileSep"></div>
+  
+  <div class="profileItem"><img src="icons/profile6.png" alt="">Download</div>
+  <div class="profileItem"><img src="icons/profile7.png" alt="">Check for updates</div>
+  <div class="profileItem"><img src="icons/profile8.png" alt="">Help and support</div>
+  <div class="profileItem"><img src="icons/profile9.png" alt="">Submit Feedback</div>
+  <div class="profileItem"><img src="icons/profile10.png" alt="">What's new</div>
+  
+  <div class="profileSep"></div>
+  <div class="profileItem"><img src="icons/profile11.png" alt="">Sign out</div>
+  <div class="profileSep"></div>
+  
+  <div class="profileVersion">Version 1.0.0</div>
+  
+</div>
+<!--dial pad-->
+<EditForm Model="@callModel" OnValidSubmit="@HandleValidCallSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+<div class="dialHolder">
+<div class="dialContainer ui-widget-content" id="draggable">
+  <div class="dialHead">
+    <div class="dialTitle">🌴 Primary</div>
+    <div><img src="icons/dialOption.png" alt=""></div>
+  </div>
+  <div class="dialUser">
+    <div class="dialImg"><img src="icons/dialUser.png" alt=""></div>
+    <div class="dialWrap">
+      <InputText id="phone-number" type="text" @bind-Value="callModel.To" class="dialNumber" placeholder="Enter a phone number to call"> </InputText>
+      <div class="dialTime">0:00</div>
+    </div>
+  </div>
+  <div class="dialButtons">
+    <div class="dialItem"><img src="icons/dialMic.png" alt=""></div>
+    <div class="dialItem"><img src="icons/dialRec.png" alt=""></div>
+    <div class="dialItem"><img src="icons/dialRepeat.png" alt=""></div>
+    <div class="dialItem dialBtn"><img src="icons/dialPad.png" alt=""></div>
+    <div class="dialItem"><img src="icons/dialSetting.png" alt=""></div>
+    <div class="dialItem active"><img src="icons/dialCall.png" alt=""></div>
+  </div>
+  <div class="dialPad dialToggle">
+    <div class="dialRow">
+      <div class="padItem">
+        <div class="padNumber">1</div>
+      </div>
+      <div class="padItem">
+        <div class="padNumber">2</div>
+        <div class="padText">A B C</div>
+      </div>
+      <div class="padItem">
+        <div class="padNumber">3</div>
+        <div class="padText">D E F</div>
+      </div>
+    </div>
+    <div class="dialRow">
+      <div class="padItem">
+        <div class="padNumber">4</div>
+        <div class="padText">G H I</div>
+      </div>
+      <div class="padItem">
+        <div class="padNumber">5</div>
+        <div class="padText">J K L</div>
+      </div>
+      <div class="padItem">
+        <div class="padNumber">6</div>
+        <div class="padText">M N O</div>
+      </div>
+    </div>
+    <div class="dialRow">
+      <div class="padItem">
+        <div class="padNumber">7</div>
+        <div class="padText">P Q R S</div>
+      </div>
+      <div class="padItem">
+        <div class="padNumber">8</div>
+        <div class="padText">T U V</div>
+      </div>
+      <div class="padItem">
+        <div class="padNumber">9</div>
+        <div class="padText">W X Y Z</div>
+      </div>
+    </div>
+    <div class="dialRow">
+      <div class="padItem">
+        <div class="padNumber">*</div>
+      </div>
+      <div class="padItem">
+        <div class="padNumber">0</div>
+        <div class="padText">+</div>
+      </div>
+      <div class="padItem">
+        <div class="padNumber">#</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+</EditForm>
+<EditForm Model="@callModel" OnValidSubmit="@HandleValidCallSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+<!--call popup-->
+<div class="popupContainer">
+  <div class="popupWrap" id="callPopup">
+  <div class="popupHead">
+
+    <div>
+      <div class="popupTitle">MAKE A CALL</div>
+      <div class="popupPhone">🌴 Primary - @UserPhoneNumber</div>
+    </div>
+
+    <div class="popupSetting"><img src="icons/popupSettings.png" alt=""></div>
+  </div>
+  <div class="popupBody">
+     
+    <InputText id="phone-number" class="emojionearea2" @bind-Value="callModel.To" type="text" placeholder="Enter a phone number or name"></InputText>
+  </div>
+  <div class="popupBase">
+    <div class="baseText" id="status"></div>
+    <audio id="audio" autoplay="autoplay" controls="controls"></audio>
+    <button class="popupCall" id="call" type="submit"><img src="icons/popupPhone.png" alt="">Call</button>
+     
+  </div>
+  </div>
+</div>
+</EditForm>
+<div class="mainContainer">
+  <div class="sideBar">
+    <div class="adminUser">
+
+      <div><img class="circular_image" src="@accountInfo.ImageURL" width="50" height="50" alt=""></div>
+      <div>@accountInfo.Name</div>
+    </div>
+    
+    <div class="navItem"><span><img src="icons/search.png" alt=""></span>Search</div>
+    <div class="navItem"><span><img src="icons/bell.png" alt=""></span>Activity</div>
+    <div class="navItem"><span><img src="icons/contact.png" alt=""></span>Contacts</div>
+    <div class="navItem"><span><img src="icons/graph.png" alt=""></span>Dashboard</div>
+    
+    <div class="sep"></div>
+    
+    <!--inboxes-->
+    <!--inbox item-->
+    <div class="sideTitle">Inboxes</div>
+    <div class="inboxHolder inboxActive">
+     <div class="inboxContainer">
+      <div class="sideIcon"><img src="icons/usFlag.png" alt=""></div>
+      <div class="inboxWrap">
+        <div class="inboxTitle">@accountInfo.Name's number</div>
+        <div class="inboxNumber"></div>
+      </div>
+      </div>
+      <div class="inboxCounter"></div>
+    </div>
+    
+ 
+    
+    <!--team-->
+    <div class="sideTitle" style="margin-top:20px;">Your team</div>
+        @foreach(var person in TeamMates)
+        {
+            <div class="teamList">
+      <div class="teamImg"><img class="circular_image" src="@person.ImageURL" width="50" height="50" alt=""></div>
+      <div class="teamTitle">@person.Name</div>
+    </div>
+        }
+        
+
+   
+    
+    
+    
+  </div>
+  <div class="chatList">
+    <div class="listHead">
+      <div class="listOption">
+        <div class="listOpen active">Open</div>
+        <div class="listDone">Done</div>
+        <div class="listUnread">Unread</div>
+      </div>
+      <div class="listAction">
+        <div @onclick="(e => ShowPhonePanel())" id="showPopup" class="actionCall"><img src="icons/phone.png" alt=""></div>
+        <div class="actionMessage"  onclick="window.location.assign('http://upwork.bifrost.inc/dashboard/newmessage/' + '@teammateId');"><img src="icons/message.png" alt=""></div>
+      </div>
+    </div>
+   
+    <div class="listHolder">
+      @if(ContactList.Count() > 0)
+       {
+             
+                foreach(var contact in ContactList)
+                {
+                    try
+                    {
+                        
+                        if(UserTexts.Count() > 0)
+                        {
+                            
+                        
+                        var latestText = UserTexts.FindLast(q => q.contact_id == contact.ID & q.teammate_ID == accountInfo.ID);
+                    if (contact != null & latestText != null)
+                    {
+
+
+                        <!--Contact List Item-->
+                        <div class="contactItem contactActive">
+                            <div class="contactImg"><img class="circular_image" src="icons/contact2.png" alt=""></div>
+                            <div class="contactInfo">
+                                <div class="contactBody">
+                                    <div class="contactTitle">@contact.phone_number @if (contact.Name == null ) {<span> [Unknown]</span>
+                                        } else {
+                                            <span> @contact.Name</span>
+                                        }</div>
+                                    <div class="contactTime">@latestText.date_received</div>
+          </div>
+          <div class="msgHolder">
+            <div class="contactMsg">@latestText.Message</div>
+          </div>
+        </div>
+                            </div>
+                        }
+                        }
+                    }
+                    catch (Exception aa)
+                    {
+                        Console.WriteLine(aa);
+                    }
+
+                }
+       }
+     
+      
+    
+      
+    </div>
+  </div>
+    @if (focusedContact != null)
+    {
+
+
+        <div class="chatPanel">
+            <div class="chatHead">
+                <div class="chatUser">
+                    <div class="userProfile"><img src="icons/chatUser.png" alt=""></div>
+                    <div class="userInfo">
+
+                        <div>@focusedContact.Name</div>
+                        <div>@focusedContact.phone_number</div>
+                    </div>
+                </div>
+                <div class="headIcons">
+                    <div><img src="icons/headIcon1.png" alt=""></div>
+                    <div><img src="icons/headIcon2.png" alt=""></div>
+                    <div><img src="icons/headIcon4.png" alt=""></div>
+                </div>
+            </div>
+
+            <div class="chatBody">
+              
+                @foreach(var text in UserTexts)
+                {
+                   
+                    if(text.contact_id == focusedContact.ID)
+                    {
+                        if(text.is_teammate == false)
+                        {
+                             <div class="defaultUser">
+                    <span><img class="circular_image" src="icons/chatUser1.png" alt=""></span>
+                    
+                    <div>@text.Message</div>
+                </div>
+                        }
+                        else
+                        {
+                            
+                <div class="userChat">
+                    <div class="chatName">@accountInfo.Name</div>
+                    <div class="bubbleHolder">
+                        <div class="bubblePurple">@text.Message</div>
+                        <span><img class="circular_image" src="@accountInfo.ImageURL" width="50" height="50" alt=""></span>
+                    </div>
+                </div> 
+                        }
+                    }
+                }
+
+               
+            </div>
+            <EditForm Model="@messageModel" OnValidSubmit="@HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+
+                <div class="chatInput">
+                    <InputTextArea id="emojionearea1" @bind-Value="messageModel.text" placeholder="Write a message..."></InputTextArea>
+                    <div class="pinIcon"><img src="icons/pinIcon.png" alt=""></div>
+                    <button class="sendIcon btn-primary" type="submit"><img src="icons/sendIcon.png" alt=""></button>
+                </div>
+            </EditForm>
+        </div>
+
+        <!--Rright Side Panel-->
+        <div class="rightPanel">
+            <div class="userDetails">
+                <div class="userDisplay"><img src="icons/userProfile.png" alt=""></div>
+                <p class="userInput">@focusedContact.Name</p>
+                <div class="sideIcons">
+                    <div class="callUser"><img src="icons/sidePhone.png" alt=""></div>
+                    <div class="msgUser"><img src="icons/sideMsg.png" alt=""></div>
+                </div>
+            </div>
+            <div class="sideSep"></div>
+            <div class="sideDetails">
+                <div class="sideItem">
+                    <div class="itemTitle"><span><img src="icons/sideWork.png" alt=""></span>Company</div>
+                    <p class="itemInput">@focusedContact.company</p>
+                </div>
+                <div class="sideItem">
+                    <div class="itemTitle"><span><img src="icons/sideRole.png" alt=""></span>Role</div>
+                    <p class="itemInput">@focusedContact.has_role_name</p>
+                </div>
+                <div class="sideItem">
+                    <div class="itemTitle"><span><img src="icons/sidePhone2.png" alt=""></span>Phone</div>
+                    <p class="itemInput">@focusedContact.phone_number</p>
+                </div>
+                <div class="sideItem">
+                    <div class="itemTitle"><span><img src="icons/sideEmail.png" alt=""></span>Email</div>
+                    <p class="itemInput">@focusedContact.email</p>
+                </div>
+                <div class="addItem"><span><img src="icons/addIcon.png" alt=""></span>Save</div>
+            </div>
+            <div class="userNote">Notes<span>0</span></div>
+            <div class="sideInput">
+                <textarea placeholder="Write a message..."></textarea>
+            </div>
+        </div>
+    }
+    else
+    {
+          <div class="chatPanel"> 
+              <EditForm Model="@messageModel" OnValidSubmit="@HandleValidNewMessage">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+    <div class="chatHead">
+   
+      <div class="sendTo">To: </div>
+      
+       <div class="toInput"><InputText type="text" id="ToPN" placeholder="Enter a phone number to text" @bind-Value="messageModel.To"></InputText></div>
+     
+  
+      <div class="headIcons">
+        <div><img src="icons/closeIcon.png" alt=""></div>
+      </div>
+    </div>
+    <div class="chatBody">
+    
+    
+    </div>
+ 
+
+                <div class="chatInput">
+                    <InputTextArea id="emojionearea1" placeholder="Write a message..." @bind-Value="messageModel.text"></InputTextArea>
+                    <div class="pinIcon"><img src="icons/pinIcon.png" alt=""></div>
+                    <button class="sendIcon btn-success" type="submit"><img src="icons/sendIcon.png" alt=""></button>
+                </div>
+            </EditForm>
+  </div>
+  
+  <!--Rright Side Panel-->
+  <div class="rightPanel">
+    <div class="userDetails">
+      <div class="userDisplay"><img class="circular" src="icons/userProfile.png" alt=""></div>
+      <input class="userInput" type="text" value="0 recipients" style="color:white;">
+    </div>
+    <div class="sideSep" style="margin-top:10px;"></div>
+
+    <div class="sideRecipient">Recipients</div>
+
+  </div>
+    }
+</div>
+
+@code{
+    public AccountInfo accountInfo { get; set; }
+    public Contacts focusedContact { get; set; }
+    public List<TeamMate> TeamMates = new List<TeamMate>();
+    public List<Texts> UserTexts = new List<Texts>();
+    public List<Contacts> ContactList = new List<Contacts>();
+    public string UserPhoneNumber { get; set; }
+    private Message messageModel = new();
+    private Call callModel = new();
+
+    public static bool newmessageInvoked = false;
+    public static bool datacycling = false;
+    private string? data;
+    private ElementReference divElement;
+    public class Message
+    {
+        public string To { get; set; }
+        [Required]
+        public string text { get; set; }
+    }
+    public class Call
+    {
+        [Required]
+        public string To { get; set; }
+    }
+
+    protected override void OnInitialized()
+    {
+        Logger.LogInformation("Login Successful! - " + teammateId);
+        accountInfo = ServerLibrary.Login(teammateId).Result;
+        UserTexts = ServerLibrary.RetrieveTexts(teammateId);
+        UserPhoneNumber = ServerLibrary.RetrievePhoneNumberByTID(accountInfo.ID);
+        TeamMates = ServerLibrary.RetrieveTeam();
+
+        if(UserTexts.Count() > 0)
+        {
+
+            focusedContact = ServerLibrary.RetrieveContactByID(UserTexts.LastOrDefault(q => q.teammate_ID == accountInfo.ID).contact_id);
+            ContactList = ServerLibrary.BuildContactListFromTexts(UserTexts, accountInfo.ID);
+        }
+
+        AppDataCycle();
+    }
+
+
+    private async Task AppDataCycle()
+    {
+        UserTexts = ServerLibrary.RetrieveTexts(teammateId);
+
+        datacycling = true;
+        while (datacycling == true)
+        {
+            var _newTexts = ServerLibrary.RetrieveTexts(teammateId);
+            if(UserTexts.Count() != _newTexts.Count())
+            {
+                UserTexts = ServerLibrary.RetrieveTexts(teammateId);
+                await InvokeAsync(() => { base.StateHasChanged(); });
+            }
+
+            await Task.Delay(6000);
+        }
+    }
+    private void HandleValidSubmit()
+    {
+        ServerLibrary.SendSMS(UserPhoneNumber, focusedContact.phone_number, messageModel.text).Wait();
+
+        Texts newText = new Texts { ID = ServerLibrary.Generate_IDKey(), contact_id = focusedContact.ID, Message = messageModel.text, teammate_ID = accountInfo.ID, is_teammate = true, account_phone_number_ID = UserPhoneNumber, date_received = DateTime.Now };
+        ServerLibrary.AddTextToDatabase(newText).Wait();
+        messageModel = new();
+        StateHasChanged();
+    }
+    private async void HandleValidCallSubmit()
+    { 
+        var clean_number = callModel.To.Trim('(').Trim(')').Trim('-');
+
+        string activeCall = await ServerLibrary.MakeOutBoundCall(UserPhoneNumber, clean_number);
+        await Task.Delay(4000);
+        await JSRuntime.InvokeVoidAsync("connectCall", activeCall);
+       
+    }
+    [Inject]
+    public IJSRuntime JSRuntime { get; set; }
+    public async Task ShowPhonePanel()
+    {
+        await JSRuntime.InvokeVoidAsync("Toggle_call_popup", "");
+    }
+
+
+    private async void HandleValidNewMessage()
+    {
+        var clean_number = messageModel.To.Trim('(').Trim(')').Trim('-');
+        ServerLibrary.SendSMS(UserPhoneNumber, clean_number, messageModel.text).Wait();
+        string _contact_id = ServerLibrary.CheckContactExists(messageModel.To);
+        if (_contact_id == "" | _contact_id == null)
+        {
+            Contacts newContact = new Contacts { phone_number = clean_number, ID = ServerLibrary.Generate_IDKey() };
+            ServerLibrary.AddContactToDatabase(newContact).Wait();
+            Texts newText = new Texts { ID = ServerLibrary.Generate_IDKey(), contact_id = newContact.ID, Message = messageModel.text, teammate_ID = accountInfo.ID, is_teammate = true, account_phone_number_ID = UserPhoneNumber, date_received = DateTime.Now };
+            ServerLibrary.AddTextToDatabase(newText).Wait();
+        }
+        else
+        {
+            Texts newText = new Texts { ID = ServerLibrary.Generate_IDKey(), contact_id = _contact_id, Message = messageModel.text, teammate_ID = accountInfo.ID, is_teammate = true, account_phone_number_ID = UserPhoneNumber, date_received = DateTime.Now };
+            ServerLibrary.AddTextToDatabase(newText).Wait();
+        }
+        messageModel = new();
+        await Task.Delay(3000);
+      
+        navigator.NavigateTo("/dashboard/"+accountInfo.ID, true);
+    }
+}

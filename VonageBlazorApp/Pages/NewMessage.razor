@@ -1,0 +1,257 @@
+﻿@page "/dashboard/newmessage/{teammateID}"
+@using Microsoft.AspNetCore.Mvc
+@using Microsoft.Extensions.Logging
+@using System.ComponentModel.DataAnnotations
+@inject ILogger<AccountInfo> Logger
+@inject NavigationManager navigator
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+@functions{
+    [Parameter]
+     public string teammateId { get; set; }
+
+}
+
+<div class="mainContainer">
+  <div class="sideBar">
+    <div class="adminUser">
+
+      <div><img class="circular_image" src="@accountInfo.ImageURL" width="50" height="50" alt=""></div>
+      <div>@accountInfo.Name</div>
+    </div>
+    
+    <div class="navItem"><span><img src="icons/search.png" alt=""></span>Search</div>
+    <div class="navItem"><span><img src="icons/bell.png" alt=""></span>Activity</div>
+    <div class="navItem"><span><img src="icons/contact.png" alt=""></span>Contacts</div>
+    <div class="navItem" onclick="window.location.assign('http://upwork.bifrost.inc/dashboard/'+ @accountInfo.ID"><span><i class="fa-dashboard"></i></span>Dashboard</div>
+    
+    <div class="sep"></div>
+    
+    <!--inboxes-->
+    <!--inbox item-->
+    <div class="sideTitle">Inboxes</div>
+    <div class="inboxHolder inboxActive">
+     <div class="inboxContainer">
+      <div class="sideIcon"><img src="icons/usFlag.png" alt=""></div>
+      <div class="inboxWrap">
+        <div class="inboxTitle">@accountInfo.Name's number</div>
+        <div class="inboxNumber"></div>
+      </div>
+      </div>
+      <div class="inboxCounter"></div>
+    </div>
+    
+ 
+    
+    <!--team-->
+    <div class="sideTitle" style="margin-top:20px;">Your team</div>
+        @foreach(var person in TeamMates)
+        {
+            <div class="teamList">
+      <div class="teamImg"><img class="circular_image" src="@person.ImageURL" width="50" height="50" alt=""></div>
+      <div class="teamTitle">@person.Name</div>
+    </div>
+        }
+        
+
+   
+    
+    
+    
+  </div>
+  <div class="chatList">
+    <div class="listHead">
+      <div class="listOption">
+        <div class="listOpen active">Open</div>
+        <div class="listDone">Done</div>
+        <div class="listUnread">Unread</div>
+      </div>
+      <div class="listAction">
+        <div id="showPopup" class="actionCall"><img src="icons/phone.png" alt=""></div>
+        <div class="actionMessage" onclick="window.location.assign('http://upwork.bifrost.inc/dashboard/newmessage/'+ @accountInfo.ID"><img src="icons/message.png" alt=""></div>
+      </div>
+    </div>
+   
+    <div class="listHolder">
+      @if(ContactList.Count() > 0)
+       {
+             
+                foreach(var contact in ContactList)
+                {
+                    try
+                    {
+                        
+                        if(UserTexts.Count() > 0)
+                        {
+                            
+                        
+                        var latestText = UserTexts.FindLast(q => q.contact_id == contact.ID & q.teammate_ID == accountInfo.ID);
+                    if (contact != null & latestText != null)
+                    {
+
+
+                        <!--Contact List Item-->
+                        <div class="contactItem contactActive">
+                            <div class="contactImg"><img class="circular_image" src="icons/contact2.png" alt=""></div>
+                            <div class="contactInfo">
+                                <div class="contactBody">
+                                    <div class="contactTitle">@contact.phone_number @if (contact.Name == null ) {<span> [Unknown]</span>
+                                        } else {
+                                            <span> @contact.Name</span>
+                                        }</div>
+                                    <div class="contactTime">@latestText.date_received</div>
+          </div>
+          <div class="msgHolder">
+            <div class="contactMsg">@latestText.Message</div>
+          </div>
+        </div>
+                            </div>
+                        }
+                        }
+                    }
+                    catch (Exception aa)
+                    {
+                        Console.WriteLine(aa);
+                    }
+
+                }
+       }
+     
+      
+    
+      
+    </div>
+  </div>
+   
+          <div class="chatPanel"> 
+              <EditForm Model="@messageModel" OnValidSubmit="@HandleValidNewMessage">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+    <div class="chatHead">
+   
+      <div class="sendTo">To: </div>
+      
+       <div class="toInput"><InputText type="text" id="ToPN" placeholder="Enter a phone number to text" @bind-Value="messageModel.To"></InputText></div>
+     
+  
+      <div class="headIcons">
+        <div><img src="icons/closeIcon.png" alt=""></div>
+      </div>
+    </div>
+    <div class="chatBody">
+    
+    
+    </div>
+ 
+
+                <div class="chatInput">
+                    <InputTextArea id="emojionearea1" placeholder="Write a message..." @bind-Value="messageModel.text"></InputTextArea>
+                    <div class="pinIcon"><img src="icons/pinIcon.png" alt=""></div>
+                    <button class="sendIcon btn-success" type="submit"><img src="icons/sendIcon.png" alt=""></button>
+                </div>
+            </EditForm>
+  </div>
+  
+  <!--Rright Side Panel-->
+  <div class="rightPanel">
+    <div class="userDetails">
+      <div class="userDisplay"><img class="circular_image" src="icons/userProfile.png" alt=""></div>
+      <input class="userInput" type="text" value="0 recipients" style="color:white;">
+    </div>
+    <div class="sideSep" style="margin-top:10px;"></div>
+
+    <div class="sideRecipient">Recipients</div>
+
+  </div>
+    
+</div>
+
+@code{
+    public AccountInfo accountInfo { get; set; }
+    public Contacts focusedContact { get; set; }
+    public List<TeamMate> TeamMates = new List<TeamMate>();
+    public List<Texts> UserTexts = new List<Texts>();
+    public List<Contacts> ContactList = new List<Contacts>();
+    public string UserPhoneNumber { get; set; }
+    private Message messageModel = new();
+    public static bool newmessageInvoked = false;
+    public class Message
+    {
+        public string To { get; set; }
+        [Required]
+        public string text { get; set; }
+    }
+
+    protected override void OnInitialized()
+    {
+        Logger.LogInformation("Login Successful! - " + teammateId);
+        accountInfo = ServerLibrary.Login(teammateId).Result;
+        UserTexts = ServerLibrary.RetrieveTexts(teammateId);
+        UserPhoneNumber = ServerLibrary.RetrievePhoneNumberByTID(accountInfo.ID);
+        TeamMates = ServerLibrary.RetrieveTeam();
+
+        if(UserTexts.Count() > 0)
+        {
+            focusedContact = ServerLibrary.RetrieveContactByID(UserTexts.LastOrDefault(q => q.teammate_ID == accountInfo.ID).contact_id);
+            ContactList = ServerLibrary.BuildContactListFromTexts(UserTexts, accountInfo.ID);
+        }
+
+        AppAI();
+        StateHasChanged();
+
+    }
+
+    private async Task AppAI()
+    {
+        UserTexts = ServerLibrary.RetrieveTexts(teammateId);
+
+        bool living = true;
+        while (living == true)
+        {
+            var _newTexts = ServerLibrary.RetrieveTexts(teammateId);
+            if(UserTexts.Count() != _newTexts.Count())
+            {
+                UserTexts = ServerLibrary.RetrieveTexts(teammateId);
+                await InvokeAsync(() => { base.StateHasChanged(); });
+            }
+            Console.WriteLine("*+");
+            await Task.Delay(6000);
+        }
+    }
+    private void HandleValidSubmit()
+    {
+        ServerLibrary.SendSMS(UserPhoneNumber, focusedContact.phone_number, messageModel.text).Wait();
+
+        Texts newText = new Texts { ID = ServerLibrary.Generate_IDKey(), contact_id = focusedContact.ID, Message = messageModel.text, teammate_ID = accountInfo.ID, is_teammate = true, account_phone_number_ID = UserPhoneNumber, date_received = DateTime.Now };
+        ServerLibrary.AddTextToDatabase(newText).Wait();
+        StateHasChanged();
+    }
+
+    public void OnGetnewMessageInvoker()
+    {
+        newmessageInvoked = true;
+        StateHasChanged();
+    }
+    private async void HandleValidNewMessage()
+    {
+        ServerLibrary.SendSMS(UserPhoneNumber, messageModel.To, messageModel.text).Wait();
+        string _contact_id = ServerLibrary.CheckContactExists(messageModel.To);
+        if (_contact_id == "" | _contact_id == null)
+        {
+            Contacts newContact = new Contacts { phone_number = messageModel.To, ID = ServerLibrary.Generate_IDKey() };
+            ServerLibrary.AddContactToDatabase(newContact).Wait();
+            Texts newText = new Texts { ID = ServerLibrary.Generate_IDKey(), contact_id = newContact.ID, Message = messageModel.text, teammate_ID = accountInfo.ID, is_teammate = true, account_phone_number_ID = UserPhoneNumber, date_received = DateTime.Now };
+            ServerLibrary.AddTextToDatabase(newText).Wait();
+        }
+        else
+        {
+            Texts newText = new Texts { ID = ServerLibrary.Generate_IDKey(), contact_id = _contact_id, Message = messageModel.text, teammate_ID = accountInfo.ID, is_teammate = true, account_phone_number_ID = UserPhoneNumber, date_received = DateTime.Now };
+            ServerLibrary.AddTextToDatabase(newText).Wait();
+        }
+
+        await Task.Delay(5000);
+
+        navigator.NavigateTo("/dashboard/"+accountInfo.ID, true);
+    }
+}

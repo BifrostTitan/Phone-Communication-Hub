@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "defaultProvider": "filesystem",
+  "libraries": [
+    {
+      "library": "C:\\Users\\proje\\node_modules\\nexmo-client\\dist\\",
+      "destination": "wwwroot/lib/vonage/"
+    },
+    {
+      "library": "C:\\Users\\proje\\node_modules\\express\\lib",
+      "destination": "wwwroot/lib/express/"
+    },
+    {
+      "library": "C:\\Users\\proje\\node_modules\\express",
+      "destination": "wwwroot/lib/express/"
+    },
+    {
+      "library": "C:\\Users\\proje\\node_modules\\mic",
+      "destination": "wwwroot/lib/mic/"
+    },
+    {
+      "provider": "filesystem",
+      "library": "C:\\Users\\proje\\node_modules\\speaker",
+      "destination": "wwwroot/speaker/"
+    },
+    {
+      "provider": "filesystem",
+      "library": "C:\\Users\\proje\\node_modules\\chunking-streams",
+      "destination": "wwwroot/chunking-streams/"
+    },
+    {
+      "provider": "filesystem",
+      "library": "C:\\Users\\proje\\node_modules\\is-buffer",
+      "destination": "wwwroot/is-buffer/"
+    },
+    {
+      "provider": "filesystem",
+      "library": "C:\\Users\\proje\\node_modules\\tonegenerator",
+      "destination": "wwwroot/tonegenerator/"
+    }
+  ]
+}

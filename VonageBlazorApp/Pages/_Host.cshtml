@@ -1,0 +1,52 @@
+﻿@page "/"
+@namespace Phone_Communication_Hub.Pages
+
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VonageBlazorApp</title>
+    <base href="~/" />
+   
+   
+     <link href="~/lib/fontawesome/css/all.css" rel="stylesheet">
+    <link href="~/lib/ionicons/css/ionicons.min.css" rel="stylesheet">
+
+    <!-- DashForge CSS -->
+    <link rel="stylesheet" href="~/assets/css/dashforge.css">
+    <link rel="stylesheet" href="~/assets/css/dashforge.auth.css">
+    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="~/css/emojionearea.min.css">
+
+</head>
+<body>
+    <component type="typeof(App)" render-mode="ServerPrerendered" />
+
+   
+
+    <script src="_framework/blazor.server.js"></script>
+     <script src="~/assets/js/phone-client.js"></script>
+      <script src="~/assets/js/wsaudio.js"></script>
+    <script src="~/lib/jquery/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/feather-icons/feather.min.js"></script>
+    <script src="~/lib/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="~/assets/js/dashforge.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+   <script type="text/javascript" src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+    <script type="text/javascript" src="~/css/emojionearea.min.js"></script>
+    <script src="https://kit.fontawesome.com/c3c8f444c2.js" crossorigin="anonymous"></script>
+    <!-- append theme customizer -->
+    <script src="~/lib/js-cookie/js.cookie.js"></script>
+
+    <script src="~/assets/js/dashforge.settings.js"></script>
+     <script src="~/assets/js/dashboard.js"></script>
+
+</body>
+</html>

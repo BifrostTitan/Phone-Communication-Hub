@@ -1,0 +1,118 @@
+﻿@page "/registration"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.Extensions.Logging
+@inject ILogger<Register> Logger
+@inject NavigationManager navigator
+
+ <header class="navbar navbar-header navbar-header-fixed">
+      <a href="#" id="mainMenuOpen" class="burger-menu"><i data-feather="menu"></i></a>
+      <div class="navbar-brand">
+        <a href="../../index.html" class="df-logo">Vonage <span> Communication Hub</span></a>
+      </div><!-- navbar-brand -->
+      <div id="navbarMenu" class="navbar-menu-wrapper">
+        <div class="navbar-menu-header">
+          <a href="../../index.html" class="df-logo">Vonage <span>Communication Hub</span></a>
+          <a id="mainMenuClose" href=""><i data-feather="x"></i></a>
+        </div><!-- navbar-menu-header -->
+        <ul class="nav navbar-menu">
+         
+        </ul>
+      </div><!-- navbar-menu-wrapper -->
+      <div class="navbar-right">
+      
+      </div><!-- navbar-right -->
+    </header><!-- navbar -->
+ <div class="content content-fixed content-auth">
+      <div class="container">
+        <div class="media align-items-stretch justify-content-center ht-100p">
+          <div class="sign-wrapper mg-lg-r-50 mg-xl-r-60">
+            <div class="pd-t-20 wd-100p">
+              <h4 class="tx-color-03 mg-b-5">Create New Account</h4>
+              <p class="tx-color-03 tx-16 mg-b-40">It's free to signup and only takes a minute.</p>
+               <EditForm Model="@registerModel" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+              <div class="form-group">
+                <label class="tx-color-03">Email address</label>
+                <InputText id="email" type="email" class="form-control" placeholder="Enter your email address" @bind-Value="registerModel.email" />
+             
+              </div>
+              <div class="form-group">
+                <div class="d-flex justify-content-between mg-b-5">
+                  <label class="mg-b-0-f tx-color-03">Password</label>
+                </div>
+              
+                  <InputText id="password" type="password" class="form-control" placeholder="Enter your password" @bind-Value="registerModel.password" />
+              </div>
+              <div class="form-group">
+                <label class="tx-color-03">Firstname</label>
+             
+                  <InputText id="first" type="text" class="form-control" placeholder="Enter your first name" @bind-Value="registerModel.first" />
+              </div>
+              <div class="form-group">
+                <label class="tx-color-03">Lastname</label>
+              
+                  <InputText id="last" type="text" class="form-control" placeholder="Enter your last name" @bind-Value="registerModel.last" />
+              </div>
+              <div class="form-group">
+                <label class="tx-color-03">Profile Picture</label>
+           
+                  <InputText id="imageurl" type="text" class="form-control" placeholder="Enter a link to your PFP" @bind-Value="registerModel.imageurl" />
+              </div>
+              <div class="form-group">
+                <label class="tx-color-03">Hub Vonage Phone-Number</label>
+             
+                  <InputText id="pnumber" type="text" class="form-control" placeholder="Enter your Vonage phone number" @bind-Value="registerModel.phone_number" />
+              </div>
+              <div class="form-group tx-12 tx-color-03">
+                By clicking <strong>Create an account</strong> below, you agree to our terms of service and privacy statement.
+              </div><!-- form-group -->
+
+              <button type="submit" class="btn btn-brand-02 btn-block">Create Account</button>
+              </EditForm>
+              <div class="divider-text">or</div>
+              
+              <div class="tx-13 mg-t-20 tx-center tx-color-03">Already have an account? <a href="http://upwork.bifrost.inc">Sign In</a></div>
+            </div>
+          </div><!-- sign-wrapper -->
+          <div class="media-body pd-y-30 pd-lg-x-50 pd-xl-x-60 align-items-center d-none d-lg-flex pos-relative">
+            
+          </div><!-- media-body -->
+        </div><!-- media -->
+      </div><!-- container -->
+    </div><!-- content -->
+
+
+@code{
+    public class Register
+    {
+        [Required]
+        public string email { get; set; }
+        [Required]
+        public string password { get; set; }
+        [Required]
+        public string first { get; set; }
+        [Required]
+        public string last { get; set; }
+
+        public string imageurl { get; set; }
+        [Required]
+        public string phone_number { get; set; }
+    }
+    private Register registerModel = new();
+
+    private void HandleValidSubmit()
+    {
+        Logger.LogInformation("Account Created! - " + registerModel.email);
+        string freshID = ServerLibrary.Generate_IDKey();
+        TeamMate newmate = new TeamMate { Email = registerModel.email, Password = registerModel.password, ID = freshID, Name = registerModel.first, AccountPermission = 0, AccountCreateDate = DateTime.Today, ImageURL = registerModel.imageurl};
+        PhoneNumber newNumber = new PhoneNumber { ID = freshID, Name = registerModel.email, Area_Code = 0, County_Code = 0, DateCreated = DateTime.Today, phoneNumber = registerModel.phone_number };
+        if(ServerLibrary.CheckUserExists(registerModel.email) == false)
+        {
+            ServerLibrary.AddUserToDatabase(newmate).Wait();
+            ServerLibrary.AddNumberToDatabase(newNumber).Wait();
+        }
+        navigator.NavigateTo("/", true);
+    }
+    
+}

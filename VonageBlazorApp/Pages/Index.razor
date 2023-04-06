@@ -1,0 +1,87 @@
+﻿@page "/"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.Extensions.Logging
+@inject ILogger<Login> Logger
+@inject NavigationManager navigator
+
+ <header class="navbar navbar-header navbar-header-fixed">
+      <a href="#" id="mainMenuOpen" class="burger-menu"><i data-feather="menu"></i></a>
+      <div class="navbar-brand">
+        <a href="../../index.html" class="df-logo">Vonage <span> Communication Hub</span></a>
+      </div><!-- navbar-brand -->
+      <div id="navbarMenu" class="navbar-menu-wrapper">
+        <div class="navbar-menu-header">
+          <a href="../../index.html" class="df-logo">Vonage <span>Communication Hub</span></a>
+          <a id="mainMenuClose" href=""><i data-feather="x"></i></a>
+        </div><!-- navbar-menu-header -->
+        <ul class="nav navbar-menu">
+         
+        </ul>
+      </div><!-- navbar-menu-wrapper -->
+      <div class="navbar-right">
+      
+      </div><!-- navbar-right -->
+    </header><!-- navbar -->
+
+    <div class="content content-fixed content-auth">
+      <div class="container">
+        <div class="media align-items-stretch justify-content-center ht-100p pos-relative">
+          <div class="media-body align-items-center d-none d-lg-flex">
+            <div class="mx-wd-600">
+              <img src="https://via.placeholder.com/1260x950" class="img-fluid" alt="">
+            </div>
+            <div class="pos-absolute b-0 l-0 tx-12 tx-center">
+            
+            </div>
+          </div><!-- media-body -->
+          <div class="sign-wrapper mg-lg-l-50 mg-xl-l-60">
+            <div class="wd-100p">
+              <h3 class="tx-color-03 mg-b-5">Sign In</h3>
+              <p class="tx-color-03 tx-16 mg-b-40">Welcome back! Please signin to continue.</p>
+               <EditForm Model="@loginModel" OnValidSubmit="@HandleValidSubmit">
+                <DataAnnotationsValidator />
+                 <ValidationSummary />
+
+              <div class="form-group">
+                <label class="tx-color-03">Email address</label>
+              
+                 <InputText id="email" type="email" class="form-control" placeholder="yourname@yourmail.com" @bind-Value="loginModel.email" />
+              </div>
+              <div class="form-group">
+                <div class="d-flex justify-content-between mg-b-5">
+                  <label class="mg-b-0-f tx-color-03">Password</label>
+                  <a href="" class="tx-13 tx-color-03">Forgot password?</a>
+                </div>
+                 <InputText id="password"  type="password" class="form-control" placeholder="Enter your password" @bind-Value="loginModel.password" />
+              </div>
+              <button type="submit" class="btn btn-brand-02 btn-block">Sign In</button>
+              <div class="divider-text">or</div>
+              </EditForm>
+              <div class="tx-13 tx-color-03 mg-t-20 tx-center">Don't have an account? <a href="http://upwork.bifrost.inc/registration">Create an Account</a></div>
+            </div>
+          </div><!-- sign-wrapper -->
+        </div><!-- media -->
+      </div><!-- container -->
+    </div><!-- content -->
+
+@code {
+    public class Login
+    {
+        [Required]
+        public string email { get; set; }
+        [Required]
+        public string password { get; set; }
+    }
+    private Login loginModel = new();
+
+    private void HandleValidSubmit()
+    {
+        Logger.LogInformation("Login Detected! - " + loginModel.email);
+        string account = ServerLibrary.CheckLogin(loginModel.email, loginModel.password);
+        Logger.LogInformation("Login ID Detected! - " + account);
+        navigator.NavigateTo("/dashboard/"+ account, true);
+    }
+   
+
+
+}
